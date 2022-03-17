@@ -1,12 +1,8 @@
 from flask import Flask
 
-def create_app():
-    app = Flask(__name__)
-    app.config["JSON_SORT_KEYS"] = False
-
-    routes.init_app(app)
-
-    """ @app.get("/posts")
+def all_routes(app: Flask):
+    
+    @app.get("/posts")
     def read_all_posts():
         return ""
 
@@ -24,6 +20,4 @@ def create_app():
 
     @app.delete("/posts/<post_id")
     def delete_a_post():
-        return "" """
-
-    return app 
+        return ""
