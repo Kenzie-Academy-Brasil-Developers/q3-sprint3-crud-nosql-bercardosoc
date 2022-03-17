@@ -1,5 +1,7 @@
 from flask import Flask
 
+from app.controllers.post_controller import post
+
 def all_routes(app: Flask):
     
     @app.get("/posts")
@@ -12,12 +14,12 @@ def all_routes(app: Flask):
 
     @app.post("/posts")
     def post_a_post():
-        return ""
+        return post()
 
-    @app.patch("/posts/<post_id")
+    @app.patch("/posts/<post_id>")
     def update_a_post():
         return ""
 
-    @app.delete("/posts/<post_id")
+    @app.delete("/posts/<post_id>")
     def delete_a_post():
         return ""
