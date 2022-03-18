@@ -1,5 +1,5 @@
 from app.exceptions.post_exceptions import PostIdNotFound
-from app.posts_package.posts_service import validate_keys, validated_id
+from app.posts_package.posts_service import validate_keys
 from app.models.post_model import Post
 from flask import jsonify, request
 from datetime import datetime
