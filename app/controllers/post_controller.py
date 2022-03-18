@@ -3,6 +3,7 @@ from http import HTTPStatus
 from flask import jsonify, request
 from app.exceptions.post_exceptions import PostIdNotFound
 from app.models.post_model import Post
+from app.posts_package.posts_service import validate_keys
 
 def get_all_posts():
 
@@ -30,12 +31,15 @@ def post_by_id(post_id: str):
 
 def create_post():
 
+    expected_keys = {"title", "author", "tags", "content"}
     data = request.get_json()
 
     try: 
+        validate_keys(data, expected_keys)
         post = Post(**data)
-    except KeyError:
-        return {"error": "Erro de chave"}, HTTPStatus.BAD_REQUEST
+    except KeyError as error:
+        return error.args[0], HTTPStatus.BAD_REQUEST
+        #return {"error": "Erro de chave"}, HTTPStatus.BAD_REQUEST
 
     post.create_post()
 
