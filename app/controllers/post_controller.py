@@ -1,33 +1,30 @@
+from app.exceptions.post_exceptions import PostIdNotFound
+from app.posts_package.posts_service import validate_keys, validated_id
+from app.models.post_model import Post
+from flask import jsonify, request
 from datetime import datetime
 from http import HTTPStatus
-from flask import jsonify, request
-from app.exceptions.post_exceptions import PostIdNotFound
-from app.models.post_model import Post
-from app.posts_package.posts_service import validate_keys
 
 def get_all_posts():
 
     posts_list = Post.get_all_posts()
     posts_list = list(posts_list)
 
-    for post in posts_list:
-        Post.serialize_post(post)
-
     return jsonify(posts_list), HTTPStatus.OK
 
-def post_by_id(post_id: str):
+def post_by_id(post_id):
 
-    if len(post_id) != 24:
-        return {"error": "ID inválido. Por favor insira 24 caracteres"}
-    
-    chosen_post = Post.get_post_by_id(post_id)
+    try:
 
-    if not chosen_post:
-        return {"error": f"id {post_id} not found"}, HTTPStatus.NOT_FOUND
-    
-    Post.serialize_post(chosen_post)
-    
-    return chosen_post, HTTPStatus.OK
+        chosen_post = Post.get_post_by_id(post_id)
+
+        if not chosen_post:
+            return {"error": f"id {post_id} not found"}, HTTPStatus.NOT_FOUND
+        
+        return chosen_post, HTTPStatus.OK
+
+    except ValueError:
+        return {"error": "A ID precisa ser um número"}, HTTPStatus.BAD_REQUEST
 
 def create_post():
 
@@ -39,42 +36,36 @@ def create_post():
         post = Post(**data)
     except KeyError as error:
         return error.args[0], HTTPStatus.BAD_REQUEST
-        #return {"error": "Erro de chave"}, HTTPStatus.BAD_REQUEST
 
     post.create_post()
 
-    serialized_post = Post.serialize_post(post)
+    return post.__dict__, HTTPStatus.CREATED
 
-    return serialized_post.__dict__, HTTPStatus.CREATED
+def delete_post(post_id):
 
-def delete_post(post_id: str):
+    try: 
 
-    if len(post_id) != 24:
-        return {"error": "ID inválido. Por favor insira 24 caracteres"}
-    
-    post_to_be_deleted = Post.delete_post(post_id)
+        post_to_be_deleted = Post.delete_post(post_id)
 
-    if not post_to_be_deleted:
-        return {"error": f"id {post_id} not found"}, HTTPStatus.NOT_FOUND
+        if not post_to_be_deleted:
+            return {"error": f"id {post_id} not found"}, HTTPStatus.NOT_FOUND
 
+        return post_to_be_deleted, HTTPStatus.OK
 
-    Post.serialize_post(post_to_be_deleted)
+    except ValueError:
+        return {"error": "A ID precisa ser um número"}, HTTPStatus.BAD_REQUEST
 
-    return post_to_be_deleted, HTTPStatus.OK
-
-def update_post(post_id: str):
-
-    if len(post_id) != 24:
-        return {"error": "ID inválido. Por favor insira 24 caracteres"}
+def update_post(post_id):
 
     data = request.get_json()
     data["updated_at"] = datetime.now().strftime("%d/%m/%Y - %X")
     
     try: 
         post_to_be_updated = Post.update_post(post_id, data)
+        return post_to_be_updated, HTTPStatus.OK
+    
     except PostIdNotFound:
         return {"error": f"id {post_id} not found"}, HTTPStatus.NOT_FOUND
-
-    serialized_post = Post.serialize_post(post_to_be_updated)
-
-    return serialized_post, HTTPStatus.OK
+    
+    except ValueError:
+        return {"error": "A ID precisa ser um número"}, HTTPStatus.BAD_REQUEST

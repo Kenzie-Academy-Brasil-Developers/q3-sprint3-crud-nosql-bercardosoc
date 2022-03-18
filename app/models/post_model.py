@@ -1,7 +1,5 @@
-from datetime import datetime
-from bson.objectid import ObjectId
 from pymongo import MongoClient, ReturnDocument
-from typing import Union
+from datetime import datetime
 from os import getenv
 import pymongo
 
@@ -21,41 +19,30 @@ class Post:
         self.content = content
         self.created_at = datetime.now().strftime("%d/%m/%Y - %X")
         self.updated_at = self.created_at
-
-    @staticmethod
-    def serialize_post(post: Union["Post", dict]):
-        if type(post) is dict:
-            post.update({"_id": str(post["_id"])})
-        elif type(post) is Post:
-            post._id = str(post._id)
-
-        return post 
-
-    @staticmethod
-    def get_all_posts():
-        
-        posts_list = db.posts.find()
-        return posts_list
-
-    @staticmethod
-    def get_post_by_id(post_id: str):
-        chosen_post = db.posts.find_one({"_id": ObjectId(post_id)})
-        return chosen_post
-
+        self._id = collection.count_documents({}) + 1
+    
     def create_post(self):
         db.posts.insert_one(self.__dict__)
 
     @staticmethod
-    def delete_post(post_id: str):
-        post_to_be_deleted = db.posts.find_one_and_delete({"_id": ObjectId(post_id)})
-        
+    def get_all_posts():
+        posts_list = db.posts.find()
+        return posts_list
+
+    @staticmethod
+    def get_post_by_id(post_id):
+        chosen_post = db.posts.find_one({"_id": int(post_id)})
+        return chosen_post
+
+    @staticmethod
+    def delete_post(post_id: int):
+        post_to_be_deleted = db.posts.find_one_and_delete({"_id": int(post_id)})
         return post_to_be_deleted
 
     @staticmethod
-    def update_post(post_id: str, payload: dict):
-
+    def update_post(post_id: int, payload: dict):
         post_to_be_updated = db.posts.find_one_and_update(
-            {"_id": ObjectId(post_id)},
+            {"_id": int(post_id)},
             {"$set": payload},
             return_document=ReturnDocument.AFTER,
         )
