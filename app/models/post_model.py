@@ -1,9 +1,11 @@
 from datetime import datetime
 from bson.objectid import ObjectId
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 from typing import Union
 from os import getenv
-import pymongo 
+import pymongo
+
+from app.exceptions.post_exceptions import PostIdNotFound 
 
 cluster = MongoClient(getenv("DATABASE_URI"))
 
@@ -42,3 +44,22 @@ class Post:
 
     def create_post(self):
         db.posts.insert_one(self.__dict__)
+
+    @staticmethod
+    def delete_post(post_id: str):
+        post_to_be_deleted = db.posts.find_one_and_delete({"_id": ObjectId(post_id)})
+        
+        return post_to_be_deleted
+
+    @staticmethod
+    def update_post(post_id: str, payload: dict):
+
+        post_to_be_updated = db.posts.find_one_and_update(
+            {"_id": ObjectId(post_id)},
+            {"$set": payload},
+            return_document=ReturnDocument.AFTER,
+        )
+        if not post_to_be_updated:
+            raise PostIdNotFound 
+            
+        return post_to_be_updated
