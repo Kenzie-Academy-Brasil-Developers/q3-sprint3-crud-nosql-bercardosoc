@@ -14,7 +14,7 @@ def all_routes(app: Flask):
 
     @app.post("/posts")
     def post_a_post():
-        return ""
+        return post_controller.create_post()
 
     @app.patch("/posts/<post_id>")
     def update_a_post():

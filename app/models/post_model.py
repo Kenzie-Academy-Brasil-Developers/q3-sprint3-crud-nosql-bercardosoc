@@ -1,3 +1,4 @@
+from datetime import datetime
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 from typing import Union
@@ -16,10 +17,9 @@ class Post:
         self.author = author
         self.tags = tags 
         self.content = content
+        self.created_at = datetime.now().strftime("%d/%m/%Y - %X")
+        self.updated_at = self.created_at
 
-        # Serão preenchidas automaticamente:
-        # id, created_at, updated_at
-        
     @staticmethod
     def serialize_post(post: Union["Post", dict]):
         if type(post) is dict:
@@ -39,3 +39,6 @@ class Post:
     def get_post_by_id(post_id: str):
         chosen_post = db.posts.find_one({"_id": ObjectId(post_id)})
         return chosen_post
+
+    def create_post(self):
+        db.self.insert_one(self.__dict__)
