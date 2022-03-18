@@ -41,4 +41,4 @@ class Post:
         return chosen_post
 
     def create_post(self):
-        db.self.insert_one(self.__dict__)
+        db.posts.insert_one(self.__dict__)
